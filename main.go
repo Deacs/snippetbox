@@ -39,13 +39,9 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 		// All changes to the header map must be made BEFORE calling WriteHeader or Write
 		// If not, they are ignored
 		w.Header().Set("Allow", "POST")
-		// Can obviously be any response header map
-		w.Header().Set("Foo", "BAR")
-		// WriteHeader can only be called once per response
-		// If it is not present, a 200 OK will automatically be sent
-		// This also the case if Write is called first
-		w.WriteHeader(405)
-		w.Write([]byte("Method Not Allowed"))
+		// Use the http.Error() function to send a "Method Not Allowed" string and
+		// 405 status code as the response body
+		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
 

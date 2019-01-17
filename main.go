@@ -1,4 +1,5 @@
 package main
+
 import (
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	
+
 	w.Write([]byte("Hello from Snippetbox"))
 }
 
@@ -26,6 +27,16 @@ func showSnippet(w http.ResponseWriter, r *http.Request) {
 
 // Add a createSnippet handler
 func createSnippet(w http.ResponseWriter, r *http.Request) {
+	// Use r.Method to check whether the request is using POST or not.
+	// If it's not, use the w.WriteHeader() method to send a 405 status code and
+	// the w.Write() to write a "Method Not Allowed" response body.
+	// We then return from the function so the subsequent code is not executed
+	if r.Method != "POST" {
+		w.WriteHeader(405)
+		w.Write([]byte("Method Not Allowed"))
+		return
+	}
+
 	w.Write([]byte("Create a new snippet..."))
 }
 

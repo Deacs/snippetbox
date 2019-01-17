@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 // Define a home handle function which writes a byte slice containing
@@ -22,7 +24,19 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 // Add a showSnippet handler
 func showSnippet(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display a specific snippet..."))
+	// Extract the value of the id from the query string and try to
+	// convert it to an integer using the strconv.Atoi() function.
+	// If it can't be converted to an integer, or the value is less than 1,
+	// We return a 404 page not found response
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Use the fmt.Fprintf() function to interpolate teh id value with our response
+	// and write it to the http.ResponseWriter
+	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
 }
 
 // Add a createSnippet handler
@@ -31,7 +45,7 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 	// If it's not, use the w.WriteHeader() method to send a 405 status code and
 	// the w.Write() to write a "Method Not Allowed" response body.
 	// We then return from the function so the subsequent code is not executed
-	// Use curl -i -X PUT http://localhost:4000/snippet/create
+	// Use curl -i -X PUT http://localhost:4000/snippet/create to test
 	if r.Method != "POST" {
 		// Use the Header().Set() method to add an 'Allow: Post' header to the
 		// response header map. The first parameter is the header name,
@@ -41,6 +55,7 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "POST")
 		// Use the http.Error() function to send a "Method Not Allowed" string and
 		// 405 status code as the response body
+		// The ResponseWriter is also sent to allow the helper to send the response
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
@@ -60,7 +75,7 @@ func main() {
 	// We pass on two params: teh TCP network address to listen on (in our case ":4000")
 	// and the servemux we just created. If http.ListenAndServe() returns an error
 	// we use the log.Fatal() function to log the error message and exit
-	log.Println("Staring server on :4000")
+	log.Println("Starting server on :4000")
 	err := http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
 }

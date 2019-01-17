@@ -31,7 +31,19 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 	// If it's not, use the w.WriteHeader() method to send a 405 status code and
 	// the w.Write() to write a "Method Not Allowed" response body.
 	// We then return from the function so the subsequent code is not executed
+	// Use curl -i -X PUT http://localhost:4000/snippet/create
 	if r.Method != "POST" {
+		// Use the Header().Set() method to add an 'Allow: Post' header to the
+		// response header map. The first parameter is the header name,
+		// the second parameter is the header value
+		// All changes to the header map must be made BEFORE calling WriteHeader or Write
+		// If not, they are ignored
+		w.Header().Set("Allow", "POST")
+		// Can obviously be any response header map
+		w.Header().Set("Foo", "BAR")
+		// WriteHeader can only be called once per response
+		// If it is not present, a 200 OK will automatically be sent
+		// This also the case if Write is called first
 		w.WriteHeader(405)
 		w.Write([]byte("Method Not Allowed"))
 		return

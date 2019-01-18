@@ -36,6 +36,9 @@ func showSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// Use the fmt.Fprintf() function to interpolate teh id value with our response
 	// and write it to the http.ResponseWriter
+	// * Note
+	// Fprintf() takes io.Writer as its first parameter which is an interface
+	// http.ResponseWriter has a w.Write() method and therefore satisfies that interface
 	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
 }
 

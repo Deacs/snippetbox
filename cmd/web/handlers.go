@@ -19,11 +19,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
 		"./ui/html/home.page.tmpl",
 		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
 	}
 
 	// Use the template.ParseFiles() function to read the template file into a template set.
 	// If there's an error, we log the detailed error message and use the
-	// http.Error() function to send a generic 500 Internal Seerver Error response to the user
+	// http.Error() function to send a generic 500 Internal Server Error response to the user
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())

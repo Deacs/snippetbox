@@ -48,23 +48,6 @@ func main() {
 		infoLog:  infoLog,
 	}
 
-	// Swap the route declarations to use the struct's methods
-	// as the handler functions
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
-
-	// Create a file server which serves files out of the "../ui/static" directory.
-	// Note that the path given to the http.Dir function is relative to
-	// the directory root
-	fileServer := http.FileServer(http.Dir("./ui/static"))
-
-	// Use the mux.Handle() function to register the file server as the handler for
-	// all URL paths that start with "/static/". For matching paths, we strip
-	// "/static" prefix before the request reaches the file server.
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
 	// Initialze a new http.Server struct. We will set the Addr and Handler fields so
 	// that the server uses the same network address and routes as before, and set
 	// the ErrorLog field so that the server now uses the custom erroLog Logger
@@ -72,7 +55,8 @@ func main() {
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		// We are now using the encapsulated routes rather than defining them directly here
+		Handler: app.routes(),
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)

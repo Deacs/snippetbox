@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 
-	// If we try to import it normally the Go compiler will raise an error.
-	//However, we need the driver's init() function to run so that it can register itself with the database/sql package.
-	//The trick to getting around this is to alias the package name to the blank identifier
+	"chilliweb.com/snippetbox/pkg/models/mysql"
+
+	// If we try to import this normally the Go compiler will raise an error.
+	// However, we need the driver's init() function to run so that it can register itself with the database/sql package.
+	// The trick to getting around this is to alias the package name to the blank identifier
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -19,6 +21,7 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func main() {
@@ -68,13 +71,16 @@ func main() {
 
 	// Initialize a new instance of application containing the dependencies
 	app := &application{
+		// Logging dependencies
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		// Add the mysql.SnippetModel instance to the dependencies
+		snippets: &mysql.SnippetModel{DB: db},
 	}
 
 	// Initialze a new http.Server struct. We will set the Addr and Handler fields so
 	// that the server uses the same network address and routes as before, and set
-	// the ErrorLog field so that the server now uses the custom erroLog Logger
+	// the ErrorLog field so that the server now uses the custom errorLog Logger
 	// in the event of any problems
 	srv := &http.Server{
 		Addr:     *addr,

@@ -1,10 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 	"net/http"
 	"os"
+
+	// If we try to import it normally the Go compiler will raise an error.
+	//However, we need the driver's init() function to run so that it can register itself with the database/sql package.
+	//The trick to getting around this is to alias the package name to the blank identifier
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Define an application struct to hold the application-wide dependencies for the
@@ -21,11 +27,14 @@ func main() {
 	// The value of he flag will be stored in the addr variable at runtime
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
+	// Define a new command-line flag for the MySQL DSN string
+	dsn := flag.String("dsn", "web:jiwa@/snippetbox?parseTime=true", "MySQL data source name")
+
 	// Importantly, we use the flag.Parse() function to parse the command-line flag.
 	// This reads in the command-line flag value and assigns it to the addr variable.
 	// This needs to be called *before* you use the addr variable
-	// otherwise it will always contain the default valiue of "":4000".
-	// If any errors are encountered during parsing teh application will be terminated
+	// otherwise it will always contain the default value of "":4000".
+	// If any errors are encountered during parsing the application will be terminated
 	flag.Parse()
 
 	// Use log.New() to create a logger for writing information messages.
@@ -39,8 +48,23 @@ func main() {
 	// the destination amd also ther log.Lshortfile flag to include the relevant
 	// file name and line number
 	// If we wanted the full file path we can use log.Llongfile instead
-	// If we wanr to force UTC datetimes, we can use the log.LUTC flag
+	// If we want to force UTC datetimes, we can use the log.LUTC flag
 	errorLog := log.New(os.Stderr, "Error\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	// To keep the main() fnction tidy, the code fro creating a connection pool
+	// has been put into the separate openDB() function below. We pass openDB() the DSN
+	// from the command-line flag.
+	db, err := openDB(*dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	// We also defer a call to db.Close() so that the connection pool is closed
+	// before the main() function exits.
+	// This is a bit superfluous. Our application is only ever terminated by a signal interrupt
+	// (i.e. Ctrl+c) or by errorLog.Fatal().
+	// In both of those cases, the program exits immediately and deferred functions are never run
+	defer db.Close()
 
 	// Initialize a new instance of application containing the dependencies
 	app := &application{
@@ -59,8 +83,23 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	infoLog.Printf("Starting server on %s", *addr)
 	// Call the ListenAndServe() method on our new http.Server struct
-	err := srv.ListenAndServe()
+	infoLog.Printf("Starting server on %s", *addr)
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
+}
+
+// The OpenDB() function wraps sql.Open() and returns a sql.DB connection pool
+// for a given DSN.
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

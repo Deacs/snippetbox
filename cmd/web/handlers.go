@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"chilliweb.com/snippetbox/pkg/models"
 )
 
 // Change the signature of the handler so it is defined as a method against *application
@@ -52,7 +54,20 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Display a snippet with ID %d...", id)
+	// Use the SnippetModel object's Get method to retrieve data for a
+	// specific record based on its ID. If no matching record is found,
+	// return a 404 Not Found resource
+	s, err := app.snippets.Get(id)
+	if err == models.ErrNoRecord {
+		app.notFound(w)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Write the snippet data as plain-text HTP response body.
+	fmt.Fprintf(w, "%v", s)
 }
 
 // Change the signature of the handler so it is defined as a method against *application

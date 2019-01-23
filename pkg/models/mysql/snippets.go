@@ -42,7 +42,7 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	// Create the SQL statement to execute
 	// Split over 2 lines for readibility
-	stmt := `SELECT id, title, content,m created, expires FROM snippets 
+	stmt := `SELECT id, title, content, created, expires FROM snippets 
 	WHERE expires > UTC_TIMESTAMP() AND id =?`
 
 	// Use the QueryRow() method on the comnnection pool to execute our

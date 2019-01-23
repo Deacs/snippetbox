@@ -36,13 +36,40 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 
 	// The ID returned has the type int64 so we convert it to an int type before returning
 	return int(id), nil
-
-	return 0, nil
 }
 
-// This will return a specific snippert based on its id.
+// This will return a specific snippet based on its id.
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
-	return nil, nil
+	// Create the SQL statement to execute
+	// Split over 2 lines for readibility
+	stmt := `SELECT id, title, content,m created, expires FROM snippets 
+	WHERE expires > UTC_TIMESTAMP() AND id =?`
+
+	// Use the QueryRow() method on the comnnection pool to execute our
+	// SQL statement, passing in the untrusted id variable as the value for the
+	// placeholder parameter. This returns a pointer to a sql.Row object which
+	// holds the result set from the database.
+	row := m.DB.QueryRow(stmt, id)
+
+	// Initialize a pointer to a new zeroed Snippet struct.
+	s := &models.Snippet{}
+
+	// Use row.Scan() to copy the values from each field in the sql.Row to the
+	// corresponding field in the Snippet struct. Notice that the arguments
+	// to row.Scan are *pointers* to the place we want to copy the data into,
+	// and the number of arguments must be exactly the same as the number of
+	// columns returned by the statement. If the query returns no rows, then
+	// row.Scan() will return a sql.ErrNoRows error. We check for that and return
+	// our models.ErrNoRecord error instead of a Snippet object
+	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+	if err == sql.ErrNoRows {
+		return nil, models.ErrNoRecord
+	} else if err != nil {
+		return nil, err
+	}
+
+	// If everything went OK then return the Snippet object.
+	return s, nil
 }
 
 // This will return the 10 latest snippets

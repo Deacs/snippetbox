@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 
@@ -79,8 +80,27 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write the snippet data as plain-text HTP response body.
-	fmt.Fprintf(w, "%v", s)
+	// Initialize a slice containing the paths to the show.page.tmpl file,
+	// plus the base layout and footer partials
+	files := []string{
+		"./ui/html/show.page.tmpl",
+		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
+	}
+
+	// Parse the template files ...
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Execute the templates
+	// The snippet data (a models.Snippet.struct) is passed in as the final parameter
+	err = ts.Execute(w, s)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 // Change the signature of the handler so it is defined as a method against *application

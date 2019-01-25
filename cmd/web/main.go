@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -19,9 +20,10 @@ import (
 // web application. For now we'll only include fields for the new custom loggers,
 // but we'll add more as the build progresses
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	snippets *mysql.SnippetModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	snippets      *mysql.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -69,6 +71,12 @@ func main() {
 	// In both of those cases, the program exits immediately and deferred functions are never run
 	defer db.Close()
 
+	// Initialize a new template cache
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// Initialize a new instance of application containing the dependencies
 	app := &application{
 		// Logging dependencies
@@ -76,6 +84,8 @@ func main() {
 		infoLog:  infoLog,
 		// Add the mysql.SnippetModel instance to the dependencies
 		snippets: &mysql.SnippetModel{DB: db},
+		// Add the template cache to the dependencies
+		templateCache: templateCache,
 	}
 
 	// Initialze a new http.Server struct. We will set the Addr and Handler fields so

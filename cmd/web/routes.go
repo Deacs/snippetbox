@@ -13,6 +13,6 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	// Wrap the exisiting chain in the logRequest() middleware.
-	return app.logRequest(secureHeaders(mux))
+	// Wrap the exisiting chain in the recoverPanic() middleware.
+	return app.recoverPanic(app.logRequest(secureHeaders(mux)))
 }

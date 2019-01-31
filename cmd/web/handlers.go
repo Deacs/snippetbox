@@ -66,8 +66,8 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// Create some variables holding dummy data
 	// We'll remove these later
-	title := "O snail"
-	content := "O snail\nClimb Mount Fuji\nBut slowly, slowly!\n\n- Kobayashi Issa"
+	title := "O Jessie"
+	content := "O Jessie\nSo many ghosts\nBut forget, forget!\n\n- Walter White"
 	expires := "7"
 
 	// Pass the data to the SnippetModel.Insert() method,

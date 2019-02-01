@@ -10,11 +10,8 @@ import (
 
 // Change the signature of the handler so it is defined as a method against *application
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		// Now using the notFound() helper
-		app.notFound(w)
-		return
-	}
+	// The Pat router explicitly matches the "/" path exactly, we can now remove the manual check
+	// of r.URL.Path != "/" from this handler.
 
 	s, err := app.snippets.Latest()
 	if err != nil {
@@ -30,7 +27,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 // Change the signature of the handler so it is defined as a method against *application
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	// The colon isn't automatically stripped from the named capture key , so we need
+	// to ge the value of ":id" from the query string instead of "id"
+	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
 	if err != nil || id < 1 {
 		// Now using the notFound() helper
 		app.notFound(w)
@@ -55,14 +54,14 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// A new createSnippetForm handler, currently returning a placeholder response
+func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
+}
+
 // Change the signature of the handler so it is defined as a method against *application
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.Header().Set("Allow", "POST")
-		// Use the clientError() helper
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
+	// The check of r.Method != "POST" is now superfluous and has been removed.
 
 	// Create some variables holding dummy data
 	// We'll remove these later
@@ -78,6 +77,6 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Redirect the user to the relevant page for the snippet
-	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
+	// Change the redirect to use the new semantic URL style of "/snippet/:id"
+	http.Redirect(w, r, fmt.Sprintf("/snippet%d", id), http.StatusSeeOther)
 }

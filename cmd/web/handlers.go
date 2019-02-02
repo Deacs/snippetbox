@@ -54,9 +54,8 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// A new createSnippetForm handler, currently returning a placeholder response
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Create a new snippet..."))
+	app.render(w, r, "create.page.tmpl", nil)
 }
 
 // Change the signature of the handler so it is defined as a method against *application
@@ -78,5 +77,5 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Change the redirect to use the new semantic URL style of "/snippet/:id"
-	http.Redirect(w, r, fmt.Sprintf("/snippet%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }

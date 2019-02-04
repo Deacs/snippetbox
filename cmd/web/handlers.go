@@ -111,6 +111,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 			FormErrors: errors,
 			FormData:   r.PostForm,
 		})
+		return
 	}
 
 	// Create a new snippet record in the database using the form data.

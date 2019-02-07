@@ -2,10 +2,10 @@ package main
 
 import (
 	"html/template"
-	"net/url"
 	"path/filepath"
 	"time"
 
+	"chilliweb.com/snippetbox/pkg/forms"
 	"chilliweb.com/snippetbox/pkg/models"
 )
 
@@ -14,8 +14,7 @@ import (
 // FormData and FormErrors now added
 type templateData struct {
 	CurrentYear int
-	FormData    url.Values
-	FormErrors  map[string]string
+	Form        *forms.Form
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 }

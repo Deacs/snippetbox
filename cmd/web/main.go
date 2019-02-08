@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"chilliweb.com/snippetbox/pkg/models/mysql"
 
@@ -14,14 +15,15 @@ import (
 	// However, we need the driver's init() function to run so that it can register itself with the database/sql package.
 	// The trick to getting around this is to alias the package name to the blank identifier
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 )
 
 // Define an application struct to hold the application-wide dependencies for the
-// web application. For now we'll only include fields for the new custom loggers,
-// but we'll add more as the build progresses
+// web application. Session has now been added
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -35,10 +37,15 @@ func main() {
 	// Define a new command-line flag for the MySQL DSN string
 	dsn := flag.String("dsn", "web:jiwa@/snippetbox?parseTime=true", "MySQL data source name")
 
+	// Define a new command-line flag for the session secret (a random key which
+	// will be used to encrypt and authenticate session cookies).
+	// It should be 32 bytes long
+	secret := flag.String("secret", "j@883r_w0c|<%-@_pO3m4alL8|`|`rQD", "Secret key")
+
 	// Importantly, we use the flag.Parse() function to parse the command-line flag.
 	// This reads in the command-line flag value and assigns it to the addr variable.
 	// This needs to be called *before* you use the addr variable
-	// otherwise it will always contain the default value of "":4000".
+	// otherwise it will always contain the default value of ":4000".
 	// If any errors are encountered during parsing the application will be terminated
 	flag.Parse()
 
@@ -56,7 +63,7 @@ func main() {
 	// If we want to force UTC datetimes, we can use the log.LUTC flag
 	errorLog := log.New(os.Stderr, "Error\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	// To keep the main() fnction tidy, the code fro creating a connection pool
+	// To keep the main() fnction tidy, the code for creating a connection pool
 	// has been put into the separate openDB() function below. We pass openDB() the DSN
 	// from the command-line flag.
 	db, err := openDB(*dsn)
@@ -77,11 +84,19 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Use the session.New() function to initialize a new session manager,
+	// passing in the scret key as the parameter. Then we configure it so
+	// sessions always expire after 12 hours
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	// Initialize a new instance of application containing the dependencies
 	app := &application{
 		// Logging dependencies
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		// Session management
+		session: session,
 		// Add the mysql.SnippetModel instance to the dependencies
 		snippets: &mysql.SnippetModel{DB: db},
 		// Add the template cache to the dependencies

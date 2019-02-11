@@ -49,8 +49,15 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use the render helper
+	// Use the PopString() method to retrieve the value for the "flash" key.
+	// PopString() also deletes the key and value from the session data, so it
+	// acts like a one-time fetch. If there is no matching key in the session
+	// data this will return an empty string
+	flash := app.session.PopString(r, "flash")
+
+	// Use the render helper with the newly created created flash message
 	app.render(w, r, "show.page.tmpl", &templateData{
+		Flash:   flash,
 		Snippet: s,
 	})
 }
@@ -62,7 +69,7 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 	})
 }
 
-// Change the signature of the handler so it is defined as a method against *application
+// Changed the signature of the handler so it is defined as a method against *application
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	// First we call r.ParseForm() which adds any data in POST request bodies
 	// to the r.PostForm map. This also works in the same way for PUT and PATCH
@@ -96,6 +103,13 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
+	// Uset the  Put() method to add a string value ("Snippet successfully created!")
+	// and the corresponding key ("flash") to the session data.
+	// Note that if there's nbo existing session for the current user
+	// (or their session has expired) then a new, empty session will be automatically
+	// created for them by the session middleware.
+	app.session.Put(r, "flash", "Snippet successfully created!")
 
 	// Redirect to view the newly created snippet
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)

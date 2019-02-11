@@ -49,15 +49,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use the PopString() method to retrieve the value for the "flash" key.
-	// PopString() also deletes the key and value from the session data, so it
-	// acts like a one-time fetch. If there is no matching key in the session
-	// data this will return an empty string
-	flash := app.session.PopString(r, "flash")
+	// Flash message is now added to the addDefaultData helper
+	// to make it available to all views.
 
 	// Use the render helper with the newly created created flash message
 	app.render(w, r, "show.page.tmpl", &templateData{
-		Flash:   flash,
 		Snippet: s,
 	})
 }

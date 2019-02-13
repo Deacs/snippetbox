@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -104,6 +105,13 @@ func main() {
 		templateCache: templateCache,
 	}
 
+	// Initialize A tls.Config struct to hold the non-default TLS settings
+	// we want the server to use
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	// Initialze a new http.Server struct. We will set the Addr and Handler fields so
 	// that the server uses the same network address and routes as before, and set
 	// the ErrorLog field so that the server now uses the custom errorLog Logger
@@ -111,8 +119,9 @@ func main() {
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		// We are now using the encapsulated routes rather than defining them directly here
-		Handler: app.routes(),
+		Handler:  app.routes(),
+		// Set the server's TLSConfig field to use the variable just created
+		TLSConfig: tlsConfig,
 	}
 
 	// Call the ListenAndServe() method on our new http.Server struct

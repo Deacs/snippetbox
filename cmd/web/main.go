@@ -122,6 +122,10 @@ func main() {
 		Handler:  app.routes(),
 		// Set the server's TLSConfig field to use the variable just created
 		TLSConfig: tlsConfig,
+		// Adding Idle, Read & Write timeouts to the server
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	// Call the ListenAndServe() method on our new http.Server struct

@@ -27,6 +27,13 @@ func (app *application) routes() http.Handler {
 	mux.Post("/snippet/create", dynamicMiddleware.ThenFunc(app.createSnippet))
 	mux.Get("/snippet/:id", dynamicMiddleware.ThenFunc(app.showSnippet))
 
+	// Authentication handling routes
+	mux.Get("/user/signup", dynamicMiddleware.ThenFunc(app.signupUser))
+	mux.Post("/user/signup", dynamicMiddleware.ThenFunc(app.signupUser))
+	mux.Get("/user/login", dynamicMiddleware.ThenFunc(app.loginUserForm))
+	mux.Post("/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
+	mux.Post("/user/logout", dynamicMiddleware.ThenFunc(app.logoutUser))
+
 	// Static fikes route does not require session middleware
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Get("/static/", http.StripPrefix("/static", fileServer))

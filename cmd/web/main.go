@@ -20,13 +20,14 @@ import (
 )
 
 // Define an application struct to hold the application-wide dependencies for the
-// web application. Session has now been added
+// web application. User Model has now been added
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
 	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
+	users         *mysql.UserModel
 }
 
 func main() {

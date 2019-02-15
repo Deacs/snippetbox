@@ -104,6 +104,8 @@ func main() {
 		snippets: &mysql.SnippetModel{DB: db},
 		// Add the template cache to the dependencies
 		templateCache: templateCache,
+		// Initialize a mysql.UserModel instance and add to the dependencies
+		users: &mysql.UserModel{DB: db},
 	}
 
 	// Initialize A tls.Config struct to hold the non-default TLS settings

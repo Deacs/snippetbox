@@ -100,7 +100,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Uset the  Put() method to add a string value ("Snippet successfully created!")
+	// Uset the Put() method to add a string value ("Snippet successfully created!")
 	// and the corresponding key ("flash") to the session data.
 	// Note that if there's nbo existing session for the current user
 	// (or their session has expired) then a new, empty session will be automatically
@@ -137,8 +137,24 @@ func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Otherwise send a placeholder response (temporary)
-	fmt.Fprintln(w, "Create the new user...")
+	// Try to create a new user in the database. If the email address already exists
+	// add an error message to the form and redisplay it
+	err = app.users.Insert(form.Get("name"), form.Get("email"), form.Get("password"))
+	if err == models.ErrDuplicateEmail {
+		form.Errors.Add("email", "Address is already in use")
+		app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Otherwise add a confirmation flash message to the session confirming that
+	// their signup worked and asking them to login.
+	app.session.Put(r, "flash", "Your signup was successful. Please login")
+
+	// And redirect the user to the login page.
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {

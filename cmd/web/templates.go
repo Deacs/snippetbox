@@ -13,11 +13,12 @@ import (
 // any dynamic data that we want to pass to our HTML templates.
 // FormData and FormErrors now added
 type templateData struct {
-	CurrentYear int
-	Flash       string
-	Form        *forms.Form
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
+	AuthenticatedUser int
+	CurrentYear       int
+	Flash             string
+	Form              *forms.Form
+	Snippet           *models.Snippet
+	Snippets          []*models.Snippet
 }
 
 // Create a humanDate function which returns a nicely formatted string

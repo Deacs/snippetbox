@@ -102,7 +102,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// Uset the Put() method to add a string value ("Snippet successfully created!")
 	// and the corresponding key ("flash") to the session data.
-	// Note that if there's nbo existing session for the current user
+	// Note that if there's no existing session for the current user
 	// (or their session has expired) then a new, empty session will be automatically
 	// created for them by the session middleware.
 	app.session.Put(r, "flash", "Snippet successfully created!")
@@ -184,7 +184,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add the ID of the current user to the session so they are now 'logged in'.
-	app.session.Put(r, "userId", id)
+	app.session.Put(r, "userID", id)
 
 	// Redirect the user to the create snippet page.
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
@@ -192,7 +192,7 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 	// Remove the userID from the session data so that the user is 'logged out'
-	app.session.Remove(r, "userId")
+	app.session.Remove(r, "userID")
 
 	// Add a flash message to the session to confirm to the user that they've been logged out.
 	app.session.Put(r, "flash", "You've been logged out successfully!")

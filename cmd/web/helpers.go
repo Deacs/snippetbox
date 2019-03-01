@@ -7,6 +7,8 @@ import (
 	"runtime/debug"
 	"time"
 
+	"chilliweb.com/snippetbox/pkg/models"
+
 	"github.com/justinas/nosurf" // CSRF Management
 )
 
@@ -76,8 +78,13 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	buf.WriteTo(w)
 }
 
-// The authenticatedUser method returns the ID of the current user from the
-// session, or zero if the request is from the an unauthenticated user.
-func (app *application) authenticatedUser(r *http.Request) int {
-	return app.session.GetInt(r, "userID")
+// We are now looking for a *models.User struct in the request context.
+// If it is present, we know we have a logged in authenticated user
+// We can return the corresponding user details
+func (app *application) authenticatedUser(r *http.Request) *models.User {
+	user, ok := r.Context().Value(contextKeyUser).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
 }

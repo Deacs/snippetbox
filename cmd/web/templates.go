@@ -13,7 +13,7 @@ import (
 // any dynamic data that we want to pass to our HTML templates.
 // FormData and FormErrors now added
 type templateData struct {
-	AuthenticatedUser int
+	AuthenticatedUser *models.User
 	CSRFToken         string
 	CurrentYear       int
 	Flash             string

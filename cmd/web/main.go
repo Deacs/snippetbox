@@ -19,6 +19,10 @@ import (
 	"github.com/golangcollege/sessions"
 )
 
+type contextKey string
+
+var contextKeyUser = contextKey("user")
+
 // Define an application struct to hold the application-wide dependencies for the
 // web application. User Model has now been added
 type application struct {

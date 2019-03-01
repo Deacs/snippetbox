@@ -14,6 +14,20 @@ type UserModel struct {
 	DB *sql.DB
 }
 
+func (m *UserModel) Get(id int) (*models.User, error) {
+	s := &models.User{}
+
+	stmt := `SELECT id, name, email, created FROM users WHERE id = ?`
+	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.Created)
+	if err == sql.ErrNoRows {
+		return nil, models.ErrNoRecord
+	} else if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
 // We'll use the Insert method to add a new record to the users table
 func (m *UserModel) Insert(name, email, password string) error {
 	// Create a bcrypt hash of the plain-text password.
@@ -70,10 +84,4 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 
 	// Otherwise, the password id correct. Return the user ID.
 	return id, nil
-}
-
-// We'll use the Get method to fetch details for a specific user
-// based on their ID
-func (m *UserModel) Get(id int) (*models.User, error) {
-	return nil, nil
 }

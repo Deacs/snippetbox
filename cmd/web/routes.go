@@ -17,7 +17,7 @@ func (app *application) routes() http.Handler {
 	// A new middleware chain containing the middelware specific to
 	// our dynamic application routes.
 	// Add the nosurf middleware on all of our 'dynamic' routes.
-	dynamicMiddleware := alice.New(app.session.Enable, noSurf)
+	dynamicMiddleware := alice.New(app.session.Enable, noSurf, app.authenticate)
 
 	mux := pat.New()
 	// These routes will use the new dynamic middleware chain followed

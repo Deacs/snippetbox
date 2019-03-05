@@ -14,18 +14,15 @@ func (app *application) routes() http.Handler {
 	// which will be used for every request our application receives
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
-	// A new middleware chain containing the middelware specific to
+	// A new middleware chain containing the middelware specific to 
 	// our dynamic application routes.
-	// Add the nosurf middleware on all of our 'dynamic' routes.
 	dynamicMiddleware := alice.New(app.session.Enable, noSurf, app.authenticate)
 
 	mux := pat.New()
 	// These routes will use the new dynamic middleware chain followed
 	// by the appropriate handler function.
 	mux.Get("/", dynamicMiddleware.ThenFunc(app.home))
-	// Add the requireAuthenticatedUser middleware to the chain.
 	mux.Get("/snippet/create", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.createSnippetForm))
-	// Add the requireAuthenticatedUser middelware to the chain.
 	mux.Post("/snippet/create", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.createSnippet))
 	mux.Get("/snippet/:id", dynamicMiddleware.ThenFunc(app.showSnippet))
 
@@ -34,7 +31,6 @@ func (app *application) routes() http.Handler {
 	mux.Post("/user/signup", dynamicMiddleware.ThenFunc(app.signupUser))
 	mux.Get("/user/login", dynamicMiddleware.ThenFunc(app.loginUserForm))
 	mux.Post("/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
-	// Add the requireAuthentictedUser middleware to the chain.
 	mux.Post("/user/logout", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.logoutUser))
 
 	// Static fikes route does not require session middleware

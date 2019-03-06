@@ -8,6 +8,11 @@ import (
 )
 
 func TestSecureHeaders(t *testing.T) {
+	// Allow the test to be run in parallel
+	// Parallel test will only be run in parallel with
+	// *other tests marked in the same way*
+	t.Parallel()
+
 	// Initialze a new httptest.ResponseRecorder and dummy http.Request.
 	rr := httptest.NewRecorder()
 

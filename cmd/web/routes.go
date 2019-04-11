@@ -14,7 +14,7 @@ func (app *application) routes() http.Handler {
 	// which will be used for every request our application receives
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
-	// A new middleware chain containing the middelware specific to 
+	// A new middleware chain containing the middelware specific to
 	// our dynamic application routes.
 	dynamicMiddleware := alice.New(app.session.Enable, noSurf, app.authenticate)
 
@@ -32,6 +32,9 @@ func (app *application) routes() http.Handler {
 	mux.Get("/user/login", dynamicMiddleware.ThenFunc(app.loginUserForm))
 	mux.Post("/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
 	mux.Post("/user/logout", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.logoutUser))
+
+	// Register the ping handler function as the handler for the GET /ping route
+	mux.Get("/ping", http.HandlerFunc(ping))
 
 	// Static fikes route does not require session middleware
 	fileServer := http.FileServer(http.Dir("./ui/static/"))

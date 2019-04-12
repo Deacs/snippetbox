@@ -33,9 +33,9 @@ func TestHumanDate(t *testing.T) {
 
 	// Loop over the test cases
 	for _, tt := range tests {
-		// Use the t.Run() function to runa sub-test for each test case.
+		// Use the t.Run() function to run a sub-test for each test case.
 		// the first parameter to this is the name of the test (which is used to
-		// identify the sub-test in any log outout) and the second parameter is
+		// identify the sub-test in any log output) and the second parameter is
 		// an anonymous function containing the actual test for the case.
 		t.Run(tt.name, func(t *testing.T) {
 			hd := humanDate(tt.tm)

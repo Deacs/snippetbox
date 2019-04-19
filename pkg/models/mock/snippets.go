@@ -8,8 +8,8 @@ import (
 
 var mockSnippet = &models.Snippet{
 	ID:      1,
-	Title:   "An old silent pond",
-	Content: "An old silent pond ...",
+	Title:   "An old and silent pond",
+	Content: "An old and silent pond...",
 	Created: time.Now(),
 	Expires: time.Now(),
 }

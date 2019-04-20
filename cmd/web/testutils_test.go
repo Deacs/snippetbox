@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
 	"regexp"
 	"testing"
 	"time"
@@ -15,6 +16,11 @@ import (
 
 	"github.com/golangcollege/sessions"
 )
+
+// Define a custom testServer type which anonymously embeds a httptest.Server instance.
+type testServer struct {
+	*httptest.Server
+}
 
 // Define a regular expression which captures the CSRF token value from the
 // HTML for our user signup page.
@@ -59,11 +65,6 @@ func newTestApplication(t *testing.T) *application {
 	}
 }
 
-// Define a custom testServer type which anonymously embeds a httptest.Server instance.
-type testServer struct {
-	*httptest.Server
-}
-
 // Create a newTestServer helper which initializes and returns a new instance
 // of our custom testServer type.
 func newTestServer(t *testing.T, h http.Handler) *testServer {
@@ -105,5 +106,25 @@ func (ts *testServer) get(t *testing.T, urlPath string) (int, http.Header, []byt
 		t.Fatal(err)
 	}
 
+	return rs.StatusCode, rs.Header, body
+}
+
+// Create a postForm method for sending POST requests to the test server.
+// The final parameter to this method is a url.Values object which can contain
+// any data that we want to send in the request body.
+func (ts *testServer) postForm(t *testing.T, urlPath string, form url.Values) (int, http.Header, []byte) {
+	rs, err := ts.Client().PostForm(ts.URL+urlPath, form)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Read the response body.
+	defer rs.Body.Close()
+	body, err := ioutil.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Return the response status, headers and body.
 	return rs.StatusCode, rs.Header, body
 }
